@@ -22,7 +22,7 @@ Environment=T3CODE_TELEMETRY_ENABLED=false
 # NL_NTFY_URL=https://ntfy.sh/<long-random-topic> goes here
 EnvironmentFile=-%h/.config/northernlights.env
 # PATH comes from environment.d, so agents get the same CLIs as Paseo's.
-ExecStart=%h/.local/share/vite-plus/bin/node apps/server/dist/bin.mjs serve --host 127.0.0.1 --tailscale-serve --tailscale-serve-port 8443 --no-browser
+ExecStart=%h/.local/share/vite-plus/fallback-bin/node apps/server/dist/bin.mjs serve --host 127.0.0.1 --tailscale-serve --tailscale-serve-port 8443 --no-browser
 Restart=on-failure
 
 [Install]

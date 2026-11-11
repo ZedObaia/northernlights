@@ -21,7 +21,7 @@ The app is served at `https://devbox.<tailnet>.ts.net:8443`, bound to localhost 
 
 - Alerts: put `NL_NTFY_URL=https://ntfy.sh/<long-random-topic>` in `~/.config/northernlights.env`,
   then `systemctl --user restart northernlights`.
-- Pair a device: `cd ~/.northernlights && ~/.local/share/vite-plus/bin/node apps/server/dist/bin.mjs pair --tailscale --tailscale-serve-port 8443`.
+- Pair a device: `cd ~/.northernlights && ~/.local/share/vite-plus/fallback-bin/node apps/server/dist/bin.mjs pair --tailscale --tailscale-serve-port 8443`.
 
 ## Phone
 
