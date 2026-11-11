@@ -97,6 +97,13 @@ perl -pi -e 's/const DESKTOP_APP_ID = "com\.t3tools\.t3code";/const DESKTOP_APP_
 perl -pi -e 's#https://github\.com/pingdotgg/t3code/releases#https://github.com/ZedObaia/northernlights#' \
   apps/desktop/src/app/DesktopStartupRecovery.ts
 
+# Telemetry: off unless T3CODE_TELEMETRY_ENABLED=true, and no notice pointing at T3's privacy policy.
+perl -0pi -e 's/(Config\.Boolean\("T3CODE_TELEMETRY_ENABLED"\)\.pipe\(\s*Config\.withDefault\()true\)/${1}false)/g' \
+  apps/server/src/telemetry/AnalyticsService.ts
+W=apps/web/src/components/onboarding/WelcomePage.tsx
+perl -0pi -e 's/\n[ \t]*<TelemetryNotice environmentId=\{environmentId\} \/>//; s/\nfunction TelemetryNotice\(.*?\n\}\n//s; s/import \{ PRIVACY_POLICY_URL \} from "\.\.\/\.\.\/legalLinks";\n//; s/import \{ managedTelemetryOffMessage, useManagedPolicy \}/import { useManagedPolicy }/' "$W"
+if grep -q "collects anonymous usage data" "$W"; then echo "rebrand: $W no longer matches; update nl/rebrand.sh" >&2; exit 1; fi
+
 # Wordmark: T3's glyph becomes an N, and the name beside it reads Northern Lights.
 for f in apps/web/src/components/T3Wordmark.tsx apps/mobile/src/components/T3Wordmark.tsx; do
   perl -pi -e 's/viewBox="15\.5309 37 94\.3941 56\.96"/viewBox="0 0 60 60"/; s/d="M33\.4509[^"]*"/d="M6 54V6h12l24 34V6h12v48H42L18 20v34z"/; s#94\.3941 / 56\.96#1#; s/accessibilityLabel="T3"/accessibilityLabel="Northern Lights"/' "$f"
