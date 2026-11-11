@@ -25,11 +25,9 @@ The app is served at `https://devbox.<tailnet>.ts.net:8443`, bound to localhost 
 
 ## Phone
 
-`.env.local` (gitignored) sets the app name, bundle ID and Apple team. Plug in the iPhone, then run:
+`.env.local` (gitignored) sets the app name, bundle ID and Apple team. With the iPhone paired to Xcode
+(USB or the same Wi-Fi), run `nl/ios-build.sh [device-udid]` to build Release and install it.
+Rebuild after syncs when you want the new version.
 
-```sh
-cd apps/mobile && vp run ios:release -- --device
-```
-
-Rebuild after syncs when you want the new version. Notifications come from the ntfy app: subscribe to
-the same topic, and tapping an alert opens the thread in Northern.
+Notifications come from the ntfy app: subscribe to the topic in `NL_NTFY_URL`. Tapping an alert
+opens the thread in Northern.
