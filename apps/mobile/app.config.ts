@@ -65,9 +65,9 @@ const PREVIEW_ASSETS = {
 } as const;
 
 const RELEASE_ASSETS = {
-  appIcon: fromRepoRoot(BRAND_ASSET_PATHS.productionIosIconPng),
-  iosIcon: fromRepoRoot(BRAND_ASSET_PATHS.productionIconComposerProject),
-  splashIcon: fromRepoRoot(BRAND_ASSET_PATHS.productionIosIconPng),
+  appIcon: repoEnv.NL_APP_ICON ?? fromRepoRoot(BRAND_ASSET_PATHS.productionIosIconPng),
+  iosIcon: repoEnv.NL_APP_ICON ?? fromRepoRoot(BRAND_ASSET_PATHS.productionIconComposerProject),
+  splashIcon: repoEnv.NL_APP_ICON ?? fromRepoRoot(BRAND_ASSET_PATHS.productionIosIconPng),
   androidAdaptiveForeground,
   androidAdaptiveBackgroundColor: "#000000",
   androidAdaptiveBackgroundImage: undefined,
