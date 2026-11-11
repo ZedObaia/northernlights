@@ -695,12 +695,12 @@ function ConfiguredCloudLinkRow({
       ) : linkRevoked ? (
         <SettingsRow
           title={searchableSetting("t3-connect").title}
-          description="This environment was removed from T3 Connect. Run `t3 connect link` on the host to link it again."
+          description="This environment was removed from T3 Connect. Run `nl connect link` on the host to link it again."
         />
       ) : isElectron ? (
         <SettingsRow
           title={searchableSetting("t3-connect").title}
-          description="Run `t3 connect link` on the host, then restart T3 Code there."
+          description="Run `nl connect link` on the host, then restart Northern Lights there."
         />
       ) : null}
       {signedOut && showSwitch ? null : (

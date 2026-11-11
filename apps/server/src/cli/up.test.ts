@@ -337,7 +337,7 @@ it.layer(Layer.mergeAll(NodeServices.layer, NodeCrypto.layer, NetService.layer))
                   : Effect.sync(() => {
                       installs++;
                       return {
-                        program: ["t3"],
+                        program: ["nl"],
                         baseDir,
                         unitPath: status.unitPath,
                         logPath: status.logPath,

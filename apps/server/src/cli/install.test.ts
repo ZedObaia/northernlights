@@ -128,7 +128,7 @@ it.layer(NodeServices.layer)("t3 install", (it) => {
       const windows = <A, E, R>(effect: Effect.Effect<A, E, R>) =>
         provide(effect.pipe(Effect.provideService(HostProcess.Platform, "win32")));
       const desktopShim =
-        '@echo off\r\nrem Written by T3 Code\r\n"C:\\T3 Code\\T3 Code.exe" "x" %*\r\n';
+        '@echo off\r\nrem Written by Northern Lights\r\n"C:\\Northern Lights\\Northern Lights.exe" "x" %*\r\n';
       yield* fs.writeFileString(shim, desktopShim);
       const foreignShim = yield* windows(installCli()).pipe(Effect.flip);
       assert.include(foreignShim.message, "Another t3 is already at");
@@ -225,7 +225,7 @@ it.layer(NodeServices.layer)("t3 install", (it) => {
       assert.isFalse(yield* fs.exists(path.join(runtimeDir, "install-prompt-declined")));
       asked = 0;
 
-      // `service install` is not `t3 install`; it still leaves the command unlinked.
+      // `service install` is not `nl install`; it still leaves the command unlinked.
       yield* offer(false, { args: ["service", "install"] });
       assert.equal(asked, 1);
       yield* offer(false);

@@ -68,7 +68,7 @@ const runtimeSpawnArguments = (paths: ReturnType<typeof runtimePaths>) => ({
 });
 
 /**
- * The unit or launch agent that `t3 service install` wrote. Its program names
+ * The unit or launch agent that `nl service install` wrote. Its program names
  * the runtime that ran the install, and a remote update never replaces it, so
  * after a commit the launcher points it at the committed runtime. Otherwise the
  * next start lands on a runtime that nothing in the service state records.
@@ -123,7 +123,7 @@ const SERVICE_UNIT_PROGRAMS = [
 
 /**
  * The unit contents with their program pointed at `version`'s runtime. A unit
- * already at that version or a newer one is returned unchanged: `t3 update`
+ * already at that version or a newer one is returned unchanged: `nl update`
  * may have repointed it to a later version while this commit was in flight.
  */
 function repointServiceUnit(contents: string, version: string): string {
@@ -1068,7 +1068,7 @@ export class Launcher {
     // Signal listeners alone do not keep Node alive.
     this.#timer = setInterval(() => {}, 2_147_483_647);
     process.stderr.write(
-      "[service-launcher] Another T3 Code server owns this T3 home. Stop it, then restart this service.\n",
+      "[service-launcher] Another Northern Lights server owns this T3 home. Stop it, then restart this service.\n",
     );
   }
 
@@ -1102,7 +1102,7 @@ export class Launcher {
 export async function main(): Promise<void> {
   const baseDir = process.env.T3CODE_HOME?.trim();
   if (baseDir === undefined || baseDir === "") {
-    throw new Error("T3CODE_HOME is required by the T3 Code service launcher.");
+    throw new Error("T3CODE_HOME is required by the Northern Lights service launcher.");
   }
   const environment = await readServiceEnvironment(baseDir);
   const statePath = NodePath.join(baseDir, "runtime", SERVICE_STATE_FILE);

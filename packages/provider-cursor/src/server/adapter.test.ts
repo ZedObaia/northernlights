@@ -785,8 +785,8 @@ describe("CursorAdapterV2", () => {
         );
         const sent = sentMessages.at(-1)!;
         return {
-          orchestration: sent.includes("## T3 Code orchestration"),
-          devices: sent.includes("## T3 Code devices"),
+          orchestration: sent.includes("## Northern Lights orchestration"),
+          devices: sent.includes("## Northern Lights devices"),
         };
       });
       const told = (orchestration: boolean, devices: boolean) => ({ orchestration, devices });

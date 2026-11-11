@@ -103,7 +103,7 @@ export const reconcileService = Effect.fn("cli.service.reconcile")(function* (op
     return { changed: false, status } satisfies ServiceReconcileResult;
   }
   if (status.supported && !status.installed) {
-    // A new service listens on this machine only, until `t3 up` opens the local network.
+    // A new service listens on this machine only, until `nl up` opens the local network.
     const { entries } = yield* readServiceEnv(baseDir);
     if (entries.T3CODE_LAN === undefined && entries.T3CODE_HOST === undefined) {
       yield* writeServiceEnv(baseDir, { T3CODE_LAN: "false" });
@@ -143,7 +143,7 @@ function formatProtection(
   return [
     protection.unprotected === undefined
       ? `  Memory protection: on${protection.setByProtect ? " (t3 service protect)" : ""}`
-      : `  Memory protection: off, ${protection.unprotected} grants none. Run \`t3 service protect\`.`,
+      : `  Memory protection: off, ${protection.unprotected} grants none. Run \`nl service protect\`.`,
     ...(protection.oomScoreAdj === undefined ? [] : [`  OOM score: ${protection.oomScoreAdj}`]),
   ];
 }
@@ -154,14 +154,14 @@ function formatServiceStatus(
   protection?: ServiceProtection.ServiceProtectionState,
 ): string {
   if (!status.supported) {
-    return "T3 Code service\n  Status: unavailable on this machine\n  Supported on: Linux with systemd, macOS with launchd";
+    return "Northern Lights service\n  Status: unavailable on this machine\n  Supported on: Linux with systemd, macOS with launchd";
   }
   if (!status.installed) {
-    return "T3 Code service\n  Status: not installed\n  Next: Run `t3 service install`.";
+    return "Northern Lights service\n  Status: not installed\n  Next: Run `nl service install`.";
   }
   if (status.otherBaseDir !== undefined) {
     return [
-      "T3 Code service",
+      "Northern Lights service",
       "  Status: installed for another T3 home",
       `  Base dir: ${status.otherBaseDir}`,
       `  Next: Pass \`${BootService.formatBootServiceBaseDirOption(status.otherBaseDir)}\` to manage it.`,
@@ -177,23 +177,23 @@ function formatServiceStatus(
     compareExactServiceVersions(status.installedVersion, cliVersion) > 0
   ) {
     return [
-      "T3 Code service",
+      "Northern Lights service",
       `  Status: installed · t3@${installedVersion} (newer than this t3@${cliVersion} CLI)`,
       `  Unit: ${status.unitPath}`,
       `  Logs: ${status.logPath}`,
       ...formatProtection(protection),
       ...problems,
-      `  Next: Run \`t3 update ${installedVersion}\` to match it, or pass \`--allow-downgrade\` to \`t3 service install\` explicitly.`,
+      `  Next: Run \`t3 update ${installedVersion}\` to match it, or pass \`--allow-downgrade\` to \`nl service install\` explicitly.`,
     ].join("\n");
   }
   return [
-    "T3 Code service",
+    "Northern Lights service",
     `  Status: ${status.current ? `installed · t3@${installedVersion}` : "needs an update or repair"}`,
     `  Unit: ${status.unitPath}`,
     `  Logs: ${status.logPath}`,
     ...formatProtection(protection),
     ...problems,
-    ...(status.current ? [] : ["  Next: Run `t3 service install` to repair it."]),
+    ...(status.current ? [] : ["  Next: Run `nl service install` to repair it."]),
   ].join("\n");
 }
 
@@ -216,7 +216,7 @@ const serviceReconcileFlags = {
 
 const serviceInstallCommand = Command.make("install", serviceReconcileFlags).pipe(
   Command.withDescription(
-    "Install T3 Code as a background service for this user. `t3 up` also chooses how your other devices reach it.",
+    "Install Northern Lights as a background service for this user. `nl up` also chooses how your other devices reach it.",
   ),
   Command.withHandler((flags) =>
     runServiceCommand(
@@ -225,13 +225,13 @@ const serviceInstallCommand = Command.make("install", serviceReconcileFlags).pip
         const result = yield* reconcileService({ allowDowngrade: flags.allowDowngrade });
         if (!result.changed) {
           yield* Console.log(
-            `T3 Code service is already installed with t3@${packageJson.version} (${yield* resolveEntryPath}).`,
+            `Northern Lights service is already installed with t3@${packageJson.version} (${yield* resolveEntryPath}).`,
           );
           return;
         }
         yield* Console.log(formatServiceChange(result));
         if (!result.previouslyInstalled) {
-          yield* Console.log("Run `t3 up` to choose how your other devices reach it.");
+          yield* Console.log("Run `nl up` to choose how your other devices reach it.");
         }
       }),
     ),
@@ -239,19 +239,19 @@ const serviceInstallCommand = Command.make("install", serviceReconcileFlags).pip
 );
 
 const serviceUpdateCommand = Command.make("update", serviceReconcileFlags).pipe(
-  Command.withDescription("Deprecated. Run `t3 update` to move to a newer release."),
+  Command.withDescription("Deprecated. Run `nl update` to move to a newer release."),
   Command.unlisted,
   Command.withHandler((flags) =>
     runServiceCommand(
       flags,
       Effect.gen(function* () {
         yield* Console.log(
-          "`t3 service update` is deprecated: run `t3 update` to move to a newer release, or `t3 service install` to repair the service. Repairing now.",
+          "`nl service update` is deprecated: run `nl update` to move to a newer release, or `nl service install` to repair the service. Repairing now.",
         );
         const result = yield* reconcileService({ allowDowngrade: flags.allowDowngrade });
         if (!result.changed) {
           yield* Console.log(
-            `T3 Code service is already using t3@${packageJson.version} (${yield* resolveEntryPath}).`,
+            `Northern Lights service is already using t3@${packageJson.version} (${yield* resolveEntryPath}).`,
           );
           return;
         }
@@ -263,7 +263,7 @@ const serviceUpdateCommand = Command.make("update", serviceReconcileFlags).pipe(
 
 const serviceRestartCommand = Command.make("restart", projectLocationFlags).pipe(
   Command.withDescription(
-    "Restart the background service. Picks up a version installed by `t3 update` that was not restarted at the time.",
+    "Restart the background service. Picks up a version installed by `nl update` that was not restarted at the time.",
   ),
   Command.withHandler((flags) =>
     runServiceCommand(
@@ -276,12 +276,12 @@ const serviceRestartCommand = Command.make("restart", projectLocationFlags).pipe
           status.installedVersion === undefined ? "" : ` on t3@${status.installedVersion}`;
         yield* Console.log(
           outcome === "restarted"
-            ? `Restarted the T3 Code service${onVersion}.`
+            ? `Restarted the Northern Lights service${onVersion}.`
             : outcome === "queued"
-              ? `Queued a restart of the T3 Code service${onVersion}. This session runs inside the service and disconnects when it goes down.\nLogs: ${status.logPath}`
+              ? `Queued a restart of the Northern Lights service${onVersion}. This session runs inside the service and disconnects when it goes down.\nLogs: ${status.logPath}`
               : status.otherBaseDir !== undefined
-                ? `The T3 Code service serves ${status.otherBaseDir}, so it was not restarted. Pass \`${BootService.formatBootServiceBaseDirOption(status.otherBaseDir)}\` to restart it.`
-                : "T3 Code service is not installed.",
+                ? `The Northern Lights service serves ${status.otherBaseDir}, so it was not restarted. Pass \`${BootService.formatBootServiceBaseDirOption(status.otherBaseDir)}\` to restart it.`
+                : "Northern Lights service is not installed.",
         );
       }),
     ),
@@ -289,7 +289,7 @@ const serviceRestartCommand = Command.make("restart", projectLocationFlags).pipe
 );
 
 const serviceUninstallCommand = Command.make("uninstall", projectLocationFlags).pipe(
-  Command.withDescription("Stop and remove the T3 Code background service."),
+  Command.withDescription("Stop and remove the Northern Lights background service."),
   Command.withHandler((flags) =>
     runServiceCommand(
       flags,
@@ -307,13 +307,15 @@ const serviceUninstallCommand = Command.make("uninstall", projectLocationFlags).
           path.resolve(installedBaseDir) !== path.resolve(baseDir)
         ) {
           yield* Console.log(
-            `The T3 Code service serves ${installedBaseDir}, so it was not removed. Pass \`${BootService.formatBootServiceBaseDirOption(installedBaseDir)}\` to remove it.`,
+            `The Northern Lights service serves ${installedBaseDir}, so it was not removed. Pass \`${BootService.formatBootServiceBaseDirOption(installedBaseDir)}\` to remove it.`,
           );
           return;
         }
         const removed = yield* service.uninstall;
         yield* Console.log(
-          removed ? "Removed the T3 Code service." : "T3 Code service is not installed.",
+          removed
+            ? "Removed the Northern Lights service."
+            : "Northern Lights service is not installed.",
         );
       }),
     ),
@@ -321,7 +323,7 @@ const serviceUninstallCommand = Command.make("uninstall", projectLocationFlags).
 );
 
 const serviceStatusCommand = Command.make("status", projectLocationFlags).pipe(
-  Command.withDescription("Show whether the T3 Code background service is installed."),
+  Command.withDescription("Show whether the Northern Lights background service is installed."),
   Command.withHandler((flags) =>
     runServiceCommand(
       flags,
@@ -361,7 +363,7 @@ const serviceProtectCommand = Command.make("protect", {
   ),
 }).pipe(
   Command.withDescription(
-    "Protect the T3 Code server from agents under memory pressure (Linux with systemd). Asks for sudo.",
+    "Protect the Northern Lights server from agents under memory pressure (Linux with systemd). Asks for sudo.",
   ),
   Command.withHandler((flags) =>
     Effect.gen(function* () {
@@ -370,7 +372,7 @@ const serviceProtectCommand = Command.make("protect", {
       // Before resolving config, which creates T3 directories that root would then own.
       if ((yield* HostProcess.UserId) === 0) {
         return yield* Console.log(
-          "Run `t3 service protect` as the user that runs T3 Code, without sudo. It asks for sudo when it needs root.",
+          "Run `nl service protect` as the user that runs Northern Lights, without sudo. It asks for sudo when it needs root.",
         );
       }
       return yield* runServiceCommand(
@@ -393,7 +395,7 @@ const serviceProtectCommand = Command.make("protect", {
               }),
             );
             if (installed === undefined) {
-              return yield* Console.log("T3 Code service protection is not set up.");
+              return yield* Console.log("Northern Lights service protection is not set up.");
             }
             yield* Console.log(
               [
@@ -404,19 +406,19 @@ const serviceProtectCommand = Command.make("protect", {
                 ),
               ].join("\n"),
             );
-            if (!(yield* confirm(flags.yes, "Remove T3 Code service protection?"))) return;
+            if (!(yield* confirm(flags.yes, "Remove Northern Lights service protection?"))) return;
             yield* ServiceProtection.removeProtection(installed);
             return yield* Console.log(
-              "Removed T3 Code service protection. The server's OOM score returns to normal after `t3 service restart`.",
+              "Removed Northern Lights service protection. The server's OOM score returns to normal after `nl service restart`.",
             );
           }
 
           yield* Console.log(
             [
-              "Keeps T3 Code running when agents fill this machine's memory:",
-              "  - reserves memory for the T3 Code server, so the kernel takes memory from agents first",
+              "Keeps Northern Lights running when agents fill this machine's memory:",
+              "  - reserves memory for the Northern Lights server, so the kernel takes memory from agents first",
               "  - makes the out-of-memory killer pick agents before the server",
-              "It adds systemd drop-in files and changes nothing else. Undo with `t3 service protect --undo`.",
+              "It adds systemd drop-in files and changes nothing else. Undo with `nl service protect --undo`.",
             ].join("\n"),
           );
           const names = remote.map((unit) => unit.replace(/\.service$/, "")).join(" and ");
@@ -442,7 +444,7 @@ const serviceProtectCommand = Command.make("protect", {
           if (!(yield* confirm(flags.yes, "Apply these settings?"))) return;
           yield* ServiceProtection.applyProtection(plan);
           yield* Console.log(
-            "Protected T3 Code. Memory protection applies now; the server takes its OOM score after `t3 service restart`. Undo with `t3 service protect --undo`.",
+            "Protected Northern Lights. Memory protection applies now; the server takes its OOM score after `nl service restart`. Undo with `nl service protect --undo`.",
           );
         }).pipe(Effect.provide(ProcessRunner.layer)),
       );
@@ -451,7 +453,7 @@ const serviceProtectCommand = Command.make("protect", {
 );
 
 export const serviceCommand = Command.make("service").pipe(
-  Command.withDescription("Manage the T3 Code background service."),
+  Command.withDescription("Manage the Northern Lights background service."),
   Command.withSubcommands([
     serviceInstallCommand,
     serviceRestartCommand,

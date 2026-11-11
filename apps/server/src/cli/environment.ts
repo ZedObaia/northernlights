@@ -94,7 +94,7 @@ const environmentLinkCommand = Command.make("link", {
     Flag.atLeast(0),
   ),
   pairingCode: Flag.String("pairing-code").pipe(
-    Flag.withDescription("A pairing code from the other environment (`t3 pair` there)."),
+    Flag.withDescription("A pairing code from the other environment (`nl pair` there)."),
   ),
   access: Flag.Literals("access", AuthMcpClientAccess.literals).pipe(
     Flag.withDescription(
@@ -104,7 +104,7 @@ const environmentLinkCommand = Command.make("link", {
   ),
 }).pipe(
   Command.withDescription(
-    "Link another T3 Code environment, so agents here can work there. It shows up there under Settings → Connections, where it can be revoked.",
+    "Link another Northern Lights environment, so agents here can work there. It shows up there under Settings → Connections, where it can be revoked.",
   ),
   Command.withHandler((flags) =>
     runWithPeerLinks(flags, (links) =>
@@ -141,7 +141,7 @@ const environmentListCommand = Command.make("list", { ...authLocationFlags, json
 const environmentUnlinkCommand = Command.make("unlink", {
   ...authLocationFlags,
   environmentId: Argument.String("environment-id").pipe(
-    Argument.withDescription("The linked environment's id, from `t3 environment list`."),
+    Argument.withDescription("The linked environment's id, from `nl environment list`."),
   ),
 }).pipe(
   Command.withDescription(
@@ -162,7 +162,9 @@ const environmentUnlinkCommand = Command.make("unlink", {
 );
 
 export const environmentCommand = Command.make("environment").pipe(
-  Command.withDescription("Link other T3 Code environments, so agents here can work there."),
+  Command.withDescription(
+    "Link other Northern Lights environments, so agents here can work there.",
+  ),
   Command.withSubcommands([
     environmentLinkCommand,
     environmentListCommand,

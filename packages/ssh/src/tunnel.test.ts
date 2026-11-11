@@ -95,7 +95,7 @@ function commandArgs(command: ChildProcess.Command): ReadonlyArray<string> {
 
 const ARCHIVE = { archiveVersion: "1.2.3-preview.20260911.4" } as const;
 
-// Emulates `t3 serve`: it takes the home owner lock at startup, then binds
+// Emulates `nl serve`: it takes the home owner lock at startup, then binds
 // once a second server has tried the same home (or after 2s), so a concurrent
 // launch always sees the home still unclaimed. Like the real server, it
 // publishes server-runtime.json after it starts answering HTTP, if at all.
