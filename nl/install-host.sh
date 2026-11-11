@@ -14,7 +14,7 @@ tailscale set --operator=nl
 if command -v ufw >/dev/null; then ufw allow in on tailscale0; fi
 
 sudo -iu nl sh -eu <<EOF
-[ -x ~/.local/share/vite-plus/bin/vp ] || curl -fsSL https://vite.plus | bash </dev/null
+[ -x ~/.local/share/vite-plus/bin/vp ] || { curl -fsSL https://vite.plus -o /tmp/vp-install.sh && bash /tmp/vp-install.sh </dev/null; }
 [ -d ~/northernlights ] || git clone $REPO ~/northernlights
 mkdir -p ~/.config/systemd/user
 touch ~/.config/northernlights.env
