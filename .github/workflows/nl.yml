@@ -1,0 +1,73 @@
+name: Northern Lights
+
+# Nightly: merge upstream's latest stable release, typecheck, push to main.
+# The Contabo host deploys main on its own timer (nl/deploy.sh).
+# Pull requests: the same checks.
+on:
+  schedule: [{ cron: "0 3 * * *" }]
+  workflow_dispatch:
+  pull_request:
+
+permissions:
+  contents: write
+  issues: write
+  actions: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v6
+        with: { fetch-depth: 0 }
+
+      - name: Merge latest upstream stable release
+        id: merge
+        if: github.event_name != 'pull_request'
+        run: |
+          if [ -n "$(gh issue list --label upstream-sync --state open --json number -q '.[]')" ]; then
+            echo "An upstream-sync issue is open; close it once main is fixed."; exit 0
+          fi
+          tag=$(gh api repos/pingdotgg/t3code/releases/latest -q .tag_name)
+          git fetch --no-tags https://github.com/pingdotgg/t3code.git "refs/tags/$tag:refs/tags/upstream/$tag"
+          if git merge-base --is-ancestor "upstream/$tag" HEAD; then echo "Already on $tag"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git merge --no-edit "upstream/$tag"; then
+            files=$(git diff --name-only --diff-filter=U)
+            git merge --abort
+            gh issue create --label upstream-sync --title "Upstream $tag: merge conflict" \
+              --body "Merge \`$tag\` from pingdotgg/t3code by hand. Conflicting files:"$'\n\n'"$files"
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Vite+
+        if: github.event_name == 'pull_request' || steps.merge.outputs.tag != ''
+        uses: ./.github/actions/setup-ci-deps
+
+      - name: Typecheck and test
+        if: github.event_name == 'pull_request' || steps.merge.outputs.tag != ''
+        run: |
+          vp run typecheck
+          cd apps/server && vp test run src/northernlights
+
+      - name: Push to main
+        if: steps.merge.outputs.tag != ''
+        run: git push origin HEAD:main
+
+      - name: Report failed checks
+        if: failure() && steps.merge.outputs.tag != ''
+        run: |
+          gh issue create --label upstream-sync --title "Upstream ${{ steps.merge.outputs.tag }}: checks failed" \
+            --body "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+
+      # Upstream's workflows need their runners and secrets; new ones arrive enabled with each merge.
+      - name: Keep upstream workflows disabled
+        if: always() && github.event_name != 'pull_request'
+        run: |
+          gh workflow list --all --json path,state \
+            -q '.[] | select(.state == "active" and .path != ".github/workflows/nl.yml") | .path' |
+            while read -r path; do gh workflow disable "$(basename "$path")"; done
