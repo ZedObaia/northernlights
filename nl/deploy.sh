@@ -1,9 +1,10 @@
 #!/bin/sh
-# Build and restart Northern Lights when origin/main moved. Runs as the nl user.
+# Build and restart Northern Lights when origin/main moved. Runs as the dev user.
 # Wrapped in main() so sh parses it fully before git replaces this file.
 main() {
   set -eu
-  cd "$HOME/northernlights"
+  export PATH="$HOME/.local/share/vite-plus/bin:$PATH"
+  cd "$HOME/.northernlights"
   git fetch -q origin main
   if [ "${1-}" != "--force" ] && [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ]; then
     exit 0

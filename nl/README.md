@@ -11,18 +11,17 @@ and `.github/workflows/nl.yml`. Upstream files carry only one-line hooks, so ups
 2. At 04:30 the host runs `nl/deploy.sh`, which rebuilds and restarts the server if `main` moved.
    The restart interrupts any running agent turns.
 
-To deploy your own changes right away: `ssh personal systemctl --user -M nl@ start northernlights-deploy`.
+To deploy your own changes right away: `ssh devbox systemctl --user start northernlights-deploy`.
 
 ## Host
 
-Run `nl/install-host.sh` as root once. It creates the `nl` user (capped at 4 CPUs and 8 GB),
-joins the tailnet, and serves the app at `https://<host>.<tailnet>.ts.net:8443`, bound to localhost only.
-Then, as `nl` (`sudo -iu nl`):
+The devbox runs it as `zeyad`, using the same agent logins and PATH as Paseo. Run `nl/install-host.sh`
+there once. It deploys from `~/.northernlights`, a checkout that `deploy.sh` hard-resets, so never work in it.
+The app is served at `https://devbox.<tailnet>.ts.net:8443`, bound to localhost and tailnet only.
 
-- log in to each provider you use, e.g. `claude` or `codex login`;
-- put `NL_NTFY_URL=https://ntfy.sh/<long-random-topic>` in `~/.config/northernlights.env`
-  then, as root, restart with `systemctl --user -M nl@ restart northernlights`;
-- pair a device: `node ~/northernlights/apps/server/dist/bin.mjs pair --tailscale --tailscale-serve-port 8443`.
+- Alerts: put `NL_NTFY_URL=https://ntfy.sh/<long-random-topic>` in `~/.config/northernlights.env`,
+  then `systemctl --user restart northernlights`.
+- Pair a device: `cd ~/.northernlights && ~/.local/share/vite-plus/bin/node apps/server/dist/bin.mjs pair --tailscale --tailscale-serve-port 8443`.
 
 ## Phone
 
