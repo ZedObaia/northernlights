@@ -12,6 +12,7 @@ main() {
   git reset -q --hard origin/main
   vp install
   vp run --filter t3 build
+  cp nl/brand/web/* apps/server/dist/client/
   # Restarting interrupts running agent turns, hence the 04:30 timer.
   systemctl --user restart northernlights
 }
