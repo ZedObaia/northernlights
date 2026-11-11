@@ -84,6 +84,19 @@ grep -rlIE --exclude-dir=node_modules -e 'npx t3|"t3"|bin[./][t]3|"bin":\{"t3"|b
     ' "$f"
   done
 
+# Data home is ~/.nl, so Northern Lights never opens a real T3 Code install's ~/.t3.
+for f in apps/server/src/os-jank.ts apps/server/src/os-jank.test.ts apps/server/src/cli/browser.ts \
+  apps/desktop/src/app/DesktopStatePaths.ts; do
+  if [ -f "$f" ]; then perl -pi -e 's/(["\x27])\.t3\1/$1.nl$1/g' "$f"; fi
+done
+
+# Desktop app: its own identity, so it never replaces or shares state with T3 Code.
+perl -pi -e 's/"productName": "T3 Code \(Beta\)"/"productName": "Northern Lights"/' apps/desktop/package.json
+perl -pi -e 's/const DESKTOP_APP_ID = "com\.t3tools\.t3code";/const DESKTOP_APP_ID = "com.zedobaia.northernlights";/; s/"T3 Code \(Nightly\)"/"Northern Lights (Nightly)"/; s/\?\? "T3 Code"\)/?? "Northern Lights")/' \
+  scripts/build-desktop-artifact.ts
+perl -pi -e 's#https://github\.com/pingdotgg/t3code/releases#https://github.com/ZedObaia/northernlights#' \
+  apps/desktop/src/app/DesktopStartupRecovery.ts
+
 # Wordmark: T3's glyph becomes an N, and the name beside it reads Northern Lights.
 for f in apps/web/src/components/T3Wordmark.tsx apps/mobile/src/components/T3Wordmark.tsx; do
   perl -pi -e 's/viewBox="15\.5309 37 94\.3941 56\.96"/viewBox="0 0 60 60"/; s/d="M33\.4509[^"]*"/d="M6 54V6h12l24 34V6h12v48H42L18 20v34z"/; s#94\.3941 / 56\.96#1#; s/accessibilityLabel="T3"/accessibilityLabel="Northern Lights"/' "$f"
