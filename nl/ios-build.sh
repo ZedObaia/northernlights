@@ -11,4 +11,6 @@ for ent in ios/*/*.entitlements; do
   /usr/libexec/PlistBuddy -c 'Delete :aps-environment' "$ent" 2>/dev/null || true
   /usr/libexec/PlistBuddy -c 'Delete :com.apple.developer.associated-domains' "$ent" 2>/dev/null || true
 done
+# iOS reuses a cached launch screen until the build number changes, so stamp each build.
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $(date +%Y%m%d%H%M)" ios/Northern/Info.plist
 npx expo run:ios --configuration Release --no-bundler --device ${1:+"$1"}
