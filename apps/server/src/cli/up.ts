@@ -192,7 +192,7 @@ const formatNextSteps = (routes: Routes, serviceInstalled: boolean, pairCommand:
       : [
           serviceInstalled
             ? "Remote access is off. Northern Lights still runs here in the background."
-            : "Remote access is off. Run `t3` to use Northern Lights here.",
+            : "Remote access is off. Run `nl` to use Northern Lights here.",
         ]),
   ].join("\n");
 
@@ -464,12 +464,12 @@ export const upCommand = Command.make("up", {
     "Set up remote access and the Northern Lights background service. Access flags skip the question, and routes not named keep their settings. Without a terminal, a needed restart runs without asking and stops running agent turns.",
   ),
   Command.withExamples([
-    { command: "t3 up", description: "Choose remote access." },
-    { command: "t3 up --connect", description: "Turn on T3 Connect. Keep other settings." },
-    { command: "t3 up --lan", description: "Allow LAN access with pairing codes." },
-    { command: "t3 up --no-lan", description: "Stop LAN access." },
-    { command: "t3 up --yes", description: "Take the defaults with no questions." },
-    { command: "t3 status --json", description: "Read the settings from a script." },
+    { command: "nl up", description: "Choose remote access." },
+    { command: "nl up --connect", description: "Turn on T3 Connect. Keep other settings." },
+    { command: "nl up --lan", description: "Allow LAN access with pairing codes." },
+    { command: "nl up --no-lan", description: "Stop LAN access." },
+    { command: "nl up --yes", description: "Take the defaults with no questions." },
+    { command: "nl status --json", description: "Read the settings from a script." },
   ]),
   Command.withHandler((flags) => runCloudCommand(flags, setUp(flags), { quietLogs: true })),
 );
@@ -520,8 +520,8 @@ export const statusCommand = Command.make("status", {
 }).pipe(
   Command.withDescription("Show service setup and remote access settings."),
   Command.withExamples([
-    { command: "t3 status", description: "Show the settings." },
-    { command: "t3 status --json", description: "Print them for scripts and agents." },
+    { command: "nl status", description: "Show the settings." },
+    { command: "nl status --json", description: "Print them for scripts and agents." },
   ]),
   Command.withHandler(
     Effect.fn("cli.status")(function* (flags) {

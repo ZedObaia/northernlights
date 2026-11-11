@@ -74,7 +74,7 @@ export const runDefaultServerCommand = Effect.fn("server.runDefaultServerCommand
     if (!explicitPath && (!(yield* fs.exists(cwd)) || (yield* fs.stat(cwd)).type !== "Directory")) {
       return yield* new CliError.UserError({
         cause: cwd,
-        userMessage: `Unknown command ${yield* encodeCommand(cwd)}. Use "t3 --help" for commands or an explicit path such as "t3 ./my-project" for a new directory.`,
+        userMessage: `Unknown command ${yield* encodeCommand(cwd)}. Use "nl --help" for commands or an explicit path such as "nl ./my-project" for a new directory.`,
       });
     }
   }
@@ -82,7 +82,7 @@ export const runDefaultServerCommand = Effect.fn("server.runDefaultServerCommand
 });
 
 export const startCommand = Command.make("start", { ...sharedServerCommandFlags }).pipe(
-  Command.withDescription("Same as `t3`."),
+  Command.withDescription("Same as `nl`."),
   Command.unlisted,
   Command.withHandler((flags) => runServerCommand(flags, { rejectRunningServer: true })),
 );

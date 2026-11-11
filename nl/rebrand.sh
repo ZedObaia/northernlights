@@ -40,10 +40,48 @@ grep -rlI --exclude-dir=node_modules -e "T3 Code" -e "T3%20Code" -e "T3+Code" \
 grep -rlI --exclude-dir=node_modules -e '`t3 ' -e '\["t3"' -e 'Command.make("t3"' \
   apps/server/src apps/web/src apps/mobile/src packages/*/src .github/triage 2>/dev/null |
   while IFS= read -r f; do
-    # Its source interpolates the command, so the real `t3` stays and the test must match it.
-    [ "$f" = apps/web/src/components/sidebar/updateEverything.logic.test.ts ] && continue
     perl -pi -e 's/`t3 ([a-z][a-z -]*)(\\?)`/`nl $1$2`/g; s/Command\.make\("t3"/Command.make("nl"/g; s/commandPath: \["t3"/commandPath: ["nl"/g' "$f"
     case "$f" in apps/server/src/cli/*.test.ts) perl -pi -e 's/\["t3"(?=[,\]])/["nl"/g' "$f" ;; esac
+  done
+
+# Binary: the executable is `nl`, and every command shown to the user says `nl`.
+# Left as `t3`: the npm package name (identity checks, `vp --filter t3`, `npx t3@<version>`) and
+# upstream's installer, updater, service launcher and pinned runtimes, which this setup never runs.
+SUBS='browser|triage|pair|serve|connect|up|status|service|update|install|uninstall|doctor|auth|thread|project|environment|policy|trace|theme|app|help|command'
+perl -pi -e 's/"t3": "\.\/dist\/bin\.mjs"/"nl": ".\/dist\/bin.mjs"/' apps/server/package.json
+grep -rlIE --exclude-dir=node_modules -e 'npx t3|"t3"|bin[./][t]3|"bin":\{"t3"|bin: \{ t3|\{ t3: Schema| t3["'"'"'`]|`t3|["'"'"'`( ]t3 ' \
+  apps/server/src/cli/invocation*.ts apps/server/src/cli/up.ts apps/server/src/cli/up.*.ts apps/server/src/cli/server*.ts \
+  apps/server/src/cli/pair*.ts apps/server/src/cli/connect*.ts apps/server/src/cli/thread*.ts \
+  apps/server/src/cli/project*.ts apps/server/src/triage .github/triage \
+  apps/web/src apps/mobile/src packages/client-runtime/src/preview 2>/dev/null |
+  while IFS= read -r f; do
+    # invocation.test.ts expects `npx t3` where the CLI rebuilds an npx command from the package name.
+    case "$f" in *invocation.test.ts) NPX=0 ;; *) NPX=1 ;; esac
+    SUBS="$SUBS" NPX="$NPX" perl -pi -e '
+      my $subs = $ENV{SUBS};
+      if ($ENV{NPX}) {
+        s/sudo npx t3 browser setup/sudo env PATH=\$PATH nl browser setup/g;
+        s/npx t3(?=[ .`"\x27])/nl/g;
+      }
+      s/path\.join\(([a-z]+(?:, "[^"]+")?), "t3"\)/path.join($1, "nl")/g;
+      s/\bt3\.(cmd|exe)\b/nl.$1/g;
+      s/(\? "nl\.(?:exe|cmd)" : )"t3"/$1"nl"/g;
+      s/: \["t3"\]/: ["nl"]/g;
+      s/resolveCommandPath\("t3"\)/resolveCommandPath("nl")/g;
+      s/path\.join\(directory, "t3"\)/path.join(directory, "nl")/g;
+      s/manifest\.bin\.t3\b/manifest.bin.nl/g;
+      s#"bin/t3"#"bin/nl"#g;
+      s#/bin/t3(?![.\w])#/bin/nl#g;
+      s/"bin":\{"t3":/"bin":{"nl":/g;
+      s/bin: \{ t3:/bin: { nl:/g;
+      s/Struct\(\{ t3: Schema\.String \}\)/Struct({ nl: Schema.String })/g;
+      s/(?<= )t3(?=["\x27`])/nl/g;
+      s/`t3 \$\{/`nl \${/g;
+      s/`t3(\\?)`/`nl$1`/g;
+      s/(["\x27`])t3 (?!code\b)(?=[a-z.\/-])/$1nl /g;
+      s/(?<=[ (])(?<!npx )t3 (?=(?:$subs|is uninstalled|\d)\b)/nl /g;
+      s/Installed t3 /Installed nl /g;
+    ' "$f"
   done
 
 # Wordmark: T3's glyph becomes an N, and the name beside it reads Northern Lights.

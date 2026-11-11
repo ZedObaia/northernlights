@@ -125,7 +125,7 @@ const withDescriptorServer = <A, E, R>(
     (server) => Effect.sync(() => server.close()),
   );
 
-describe("t3 pair", () => {
+describe("nl pair", () => {
   it.effect("publishes an IPv6-only server through Tailscale Serve when pairing", () =>
     withDescriptorServer(
       (origin) =>
@@ -227,7 +227,7 @@ describe("t3 pair", () => {
           readonly scopes: ReadonlyArray<string>;
         }>;
         assert.equal(credentials.length, 1);
-        assert.equal(credentials[0]?.label, "t3 pair");
+        assert.equal(credentials[0]?.label, "nl pair");
         assert.deepEqual(credentials[0]?.scopes, AuthStandardClientScopes);
       }),
     ).pipe(
@@ -316,7 +316,7 @@ describe("t3 pair", () => {
   it.effect("ignores runtime state whose recorded pid is no longer alive", () =>
     withDescriptorServer((origin) =>
       Effect.gen(function* () {
-        const baseDir = NodeFS.mkdtempSync(NodePath.join(NodeOS.tmpdir(), "t3 pair pid test-"));
+        const baseDir = NodeFS.mkdtempSync(NodePath.join(NodeOS.tmpdir(), "nl pair pid test-"));
         const statePath = NodePath.join(baseDir, "userdata", "server-runtime.json");
         const state = yield* makePersistedServerRuntimeState({
           config: { host: "127.0.0.1", devUrl: undefined },

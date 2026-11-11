@@ -12,7 +12,9 @@ This README is generated from `nl/README.md` by `nl/rebrand.sh`.
 ## Brand
 
 `nl/rebrand.sh` turns T3 Code into Northern Lights. It swaps every brand image for `nl/brand/`,
-renames "T3 Code" in app, server and test sources, and renames the CLI to `nl` in help and messages.
+renames "T3 Code" in app, server and test sources, and makes the executable `nl`: the package's `bin`,
+the CLI's own name, and every command shown in the CLI, web and mobile apps. The npm package name stays
+`t3`, and so do upstream's installer, updater and service launcher, which this setup never runs.
 It is idempotent, and rebrand commits are its output, so never hand-edit a rebranded line: change
 the script and re-run it. Hand-written changes are limited to `apps/server/src/server.ts`,
 `apps/server/src/relay/AgentAwarenessRelay.ts` and `apps/mobile/app.config.ts`.

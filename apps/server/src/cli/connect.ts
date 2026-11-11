@@ -290,7 +290,7 @@ const withCloudCliSessionToken = <A, E, R>(
     environmentAuth.issueSession({
       scopes: [scope],
       subject: "cloud-cli",
-      label: "t3 connect cli",
+      label: "nl connect cli",
     }),
     (issued) => run(issued.token),
     (issued) => environmentAuth.revokeSession(issued.sessionId).pipe(Effect.ignore({ log: true })),

@@ -12,12 +12,12 @@ import { SettingsRow } from "./settingsLayout";
 import { searchableSetting } from "./settingsSearch";
 
 const FAILURE_TITLES = {
-  install: "Could not install t3",
-  uninstall: "Could not remove t3",
+  install: "Could not install nl",
+  uninstall: "Could not remove nl",
   addToPath: "Could not add t3 to PATH",
 } as const;
 
-/** The desktop `t3` command's state, and its actions with a toast on failure. */
+/** The desktop `nl` command's state, and its actions with a toast on failure. */
 export function useDesktopCliCommand() {
   const bridge = getDesktopCliCommandBridge();
   const query = useEnvironmentQuery(bridge ? desktopCliCommandStateAtom : null);
@@ -55,12 +55,12 @@ export function CliCommandSettingsRow() {
   const description = state.shadowedBy
     ? `Another t3 at ${state.shadowedBy} runs first in a new terminal. Remove it to use Northern Lights's.`
     : !installed
-      ? "Run Northern Lights's CLI as `t3` from any terminal."
+      ? "Run Northern Lights's CLI as `nl` from any terminal."
       : state.onPath
         ? `Installed at ${state.installedPath}. Open a new terminal to use it.`
         : state.pathSetup?.added
           ? `Installed at ${state.installedPath} and added to PATH in ${state.pathSetup.file}. Open a new terminal to use it.`
-          : `Installed at ${state.installedPath}, which is not on your PATH yet.${state.pathSetup ? "" : " Add its folder to your PATH to run `t3`."}`;
+          : `Installed at ${state.installedPath}, which is not on your PATH yet.${state.pathSetup ? "" : " Add its folder to your PATH to run `nl`."}`;
 
   return (
     <SettingsRow

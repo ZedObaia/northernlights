@@ -469,7 +469,7 @@ function GateScreen({
             <p className="text-sm text-muted-foreground">{turnOnHere.reason}</p>
           ) : (
             <div className="space-y-2 text-sm">
-              <CommandBlock command="t3 connect link" />
+              <CommandBlock command="nl connect link" />
               <p>Restart Northern Lights on {name}.</p>
               {checkAgain}
             </div>
