@@ -33,16 +33,23 @@ jobs:
           tag=$(gh api repos/pingdotgg/t3code/releases/latest -q .tag_name)
           git fetch --no-tags https://github.com/pingdotgg/t3code.git "refs/tags/$tag:refs/tags/upstream/$tag"
           if git merge-base --is-ancestor "upstream/$tag" HEAD; then echo "Already on $tag"; exit 0; fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          conflicted=false
           if ! git merge --no-edit "upstream/$tag"; then
+            conflicted=true
             files=$(git diff --name-only --diff-filter=U)
-            git merge --abort
-            gh issue create --label upstream-sync --title "Upstream $tag: merge conflict" \
-              --body "Merge \`$tag\` from pingdotgg/t3code by hand. Conflicting files:"$'\n\n'"$files"
-            exit 1
+            # Only these carry hand-written changes; any other conflict is rebrand.sh output.
+            hand=$(printf '%s\n' "$files" | grep -xF -e apps/server/src/server.ts \
+              -e apps/server/src/relay/AgentAwarenessRelay.ts -e apps/mobile/app.config.ts || true)
+            if [ -n "$hand" ]; then echo "Resolve by hand:"; echo "$hand"; exit 1; fi
+            for f in $files; do git checkout --theirs -- "$f" 2>/dev/null || git rm -q -- "$f"; done
           fi
-          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          sh nl/rebrand.sh
+          git add -A
+          if [ "$conflicted" = true ]; then git commit -q --no-edit
+          elif ! git diff --cached --quiet; then git commit -q -m "chore(nl): rebrand upstream $tag"; fi
 
       - name: Setup Vite+
         if: github.event_name == 'pull_request' || steps.merge.outputs.tag != ''
@@ -58,10 +65,10 @@ jobs:
         if: steps.merge.outputs.tag != ''
         run: git push origin HEAD:main
 
-      - name: Report failed checks
+      - name: Report a failed sync
         if: failure() && steps.merge.outputs.tag != ''
         run: |
-          gh issue create --label upstream-sync --title "Upstream ${{ steps.merge.outputs.tag }}: checks failed" \
+          gh issue create --label upstream-sync --title "Upstream ${{ steps.merge.outputs.tag }}: sync failed" \
             --body "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
 
       # Upstream's workflows need their runners and secrets; new ones arrive enabled with each merge.

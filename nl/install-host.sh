@@ -50,6 +50,22 @@ Persistent=true
 WantedBy=timers.target
 UNIT
 
+# The `nl` CLI. Coreutils also has an `nl` that agents use (`nl -ba file`), so only
+# Northern Lights subcommands go to the server; everything else reaches /usr/bin/nl.
+# update/install/uninstall/service/up manage upstream's npm install, which this host doesn't use.
+mkdir -p ~/.local/bin
+cat > ~/.local/bin/nl <<'CLI'
+#!/bin/sh
+case "${1-}" in
+  help|serve|app|pair|auth|environment|browser|project|thread|status|theme|trace|doctor|policy|triage)
+    exec "$HOME/.local/share/vite-plus/fallback-bin/node" "$HOME/.northernlights/apps/server/dist/bin.mjs" "$@" ;;
+  update|install|uninstall|service|up)
+    echo "nl $1: not used here. Deploys come from nl.yml and the northernlights-deploy timer." >&2; exit 1 ;;
+esac
+exec /usr/bin/nl "$@"
+CLI
+chmod +x ~/.local/bin/nl
+
 systemctl --user daemon-reload
 systemctl --user enable northernlights northernlights-deploy.timer
 systemctl --user start northernlights-deploy.timer
