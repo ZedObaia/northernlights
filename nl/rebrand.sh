@@ -19,6 +19,9 @@ for f in assets/prod/* assets/nightly/* assets/dev/*; do
   esac
 done
 
+# The root README says what this fork is (upstream's README changes never conflict).
+cp nl/README.md README.md
+
 # Text: the product name everywhere users or agents read it (tests too, so they stay consistent).
 # Kept as upstream: tests whose "T3 Code" is input data, and the MCP server's protocol name,
 # which providers echo into tool labels that t3McpToolPresentation parses.

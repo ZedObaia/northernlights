@@ -1,8 +1,13 @@
 # Northern Lights
 
-A personal fork of [T3 Code](https://github.com/pingdotgg/t3code), rebranded, running on the devbox
-over Tailscale with no T3 Connect. Fork code lives in `nl/`, `apps/server/src/northernlights/` and
-`.github/workflows/nl.yml`.
+Northern Lights is a personal fork of [T3 Code](https://github.com/pingdotgg/t3code) by T3 Tools Inc.
+All credit for the app goes to the T3 Code team. This fork rebrands it, runs it on my own devbox over
+Tailscale without T3 Connect, and adds the workflows I need. It follows upstream's stable releases.
+It is not affiliated with or endorsed by T3 Tools, and T3 Code's MIT license and copyright notice
+apply ([LICENSE](LICENSE)).
+
+Fork code lives in `nl/`, `apps/server/src/northernlights/` and `.github/workflows/nl.yml`.
+This README is generated from `nl/README.md` by `nl/rebrand.sh`.
 
 ## Brand
 
