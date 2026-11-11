@@ -6,6 +6,7 @@ REPO=https://github.com/ZedObaia/northernlights.git
 
 id nl >/dev/null 2>&1 || useradd --create-home --shell /bin/bash nl
 loginctl enable-linger nl
+dpkg -s libatomic1 >/dev/null 2>&1 || apt-get install -y libatomic1 # Node 26 needs it
 systemctl set-property "user-$(id -u nl).slice" CPUQuota=400% MemoryMax=8G
 
 command -v tailscale >/dev/null || curl -fsSL https://tailscale.com/install.sh | sh
@@ -25,11 +26,11 @@ Description=Northern Lights server
 
 [Service]
 WorkingDirectory=%h/northernlights
-Environment=PATH=%h/.local/bin:%h/.local/share/vite-plus/bin:%h/.local/share/vite-plus/fallback-bin:/usr/local/bin:/usr/bin:/bin
+Environment=PATH=%h/.local/bin:%h/.local/share/vite-plus/bin:/usr/local/bin:/usr/bin:/bin
 Environment=T3CODE_TELEMETRY_ENABLED=false
 # NL_NTFY_URL=https://ntfy.sh/<long-random-topic> goes here
 EnvironmentFile=-%h/.config/northernlights.env
-ExecStart=%h/.local/share/vite-plus/fallback-bin/node apps/server/dist/bin.mjs serve --host 127.0.0.1 --tailscale-serve --tailscale-serve-port 8443 --no-browser
+ExecStart=%h/.local/share/vite-plus/bin/node apps/server/dist/bin.mjs serve --host 127.0.0.1 --tailscale-serve --tailscale-serve-port 8443 --no-browser
 Restart=on-failure
 
 [Install]
@@ -43,7 +44,7 @@ Description=Deploy Northern Lights main
 [Service]
 Type=oneshot
 WorkingDirectory=%h/northernlights
-Environment=PATH=%h/.local/share/vite-plus/bin:%h/.local/share/vite-plus/fallback-bin:/usr/local/bin:/usr/bin:/bin
+Environment=PATH=%h/.local/share/vite-plus/bin:/usr/local/bin:/usr/bin:/bin
 ExecStart=/bin/sh %h/northernlights/nl/deploy.sh
 UNIT
 
@@ -63,5 +64,5 @@ export XDG_RUNTIME_DIR=/run/user/\$(id -u)
 systemctl --user daemon-reload
 systemctl --user enable northernlights northernlights-deploy.timer
 systemctl --user start northernlights-deploy.timer
-PATH=\$HOME/.local/share/vite-plus/bin:\$HOME/.local/share/vite-plus/fallback-bin:\$PATH sh ~/northernlights/nl/deploy.sh --force
+PATH=\$HOME/.local/share/vite-plus/bin:\$PATH sh ~/northernlights/nl/deploy.sh --force
 EOF
