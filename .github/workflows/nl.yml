@@ -1,11 +1,14 @@
 name: Northern Lights
 
-# Nightly: merge upstream's latest stable release, typecheck, push to main.
-# The Contabo host deploys main on its own timer (nl/deploy.sh).
-# Pull requests: the same checks.
+# Nightly: merge upstream's latest stable release, rebrand, typecheck, push to main.
+# The devbox deploys main on its own timer (nl/deploy.sh). Pull requests: the same checks.
 on:
   schedule: [{ cron: "0 3 * * *" }]
   workflow_dispatch:
+    inputs:
+      ref:
+        description: Upstream branch or tag to merge (default is the latest stable release)
+        required: false
   pull_request:
 
 permissions:
@@ -23,21 +26,24 @@ jobs:
       - uses: actions/checkout@v6
         with: { fetch-depth: 0 }
 
-      - name: Merge latest upstream stable release
+      - name: Merge upstream
         id: merge
         if: github.event_name != 'pull_request'
+        env:
+          REF: ${{ inputs.ref }}
         run: |
           if [ -n "$(gh issue list --label upstream-sync --state open --json number -q '.[]')" ]; then
             echo "An upstream-sync issue is open; close it once main is fixed."; exit 0
           fi
-          tag=$(gh api repos/pingdotgg/t3code/releases/latest -q .tag_name)
-          git fetch --no-tags https://github.com/pingdotgg/t3code.git "refs/tags/$tag:refs/tags/upstream/$tag"
-          if git merge-base --is-ancestor "upstream/$tag" HEAD; then echo "Already on $tag"; exit 0; fi
+          tag=${REF:-$(gh api repos/pingdotgg/t3code/releases/latest -q .tag_name)}
+          git fetch --no-tags https://github.com/pingdotgg/t3code.git "$tag"
+          target=$(git rev-parse 'FETCH_HEAD^{commit}')
+          if git merge-base --is-ancestor "$target" HEAD; then echo "Already on $tag"; exit 0; fi
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           conflicted=false
-          if ! git merge --no-edit "upstream/$tag"; then
+          if ! git merge --no-edit -m "Merge upstream $tag" "$target"; then
             conflicted=true
             files=$(git diff --name-only --diff-filter=U)
             # Only these carry hand-written changes; any other conflict is rebrand.sh output.
